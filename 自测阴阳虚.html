@@ -1,0 +1,187 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>中医体质辨识（阴虚/阳虚）</title>
+    <style>
+        body {
+            font-family: '微软雅黑', sans-serif;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .question-box {
+            border: 1px solid #ddd;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .option {
+            margin: 10px 0;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .option:hover {
+            background: #e9ecef;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #eee;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+
+        .progress {
+            height: 100%;
+            background: #4CAF50;
+            transition: width 0.5s;
+        }
+
+        #result {
+            display: none;
+            padding: 25px;
+            background: #f4f4f4;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .advice {
+            color: #2c3e50;
+            font-weight: bold;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <h2>中医体质辨识问卷（阴虚/阳虚）</h2>
+    <div class="progress-bar">
+        <div class="progress" style="width: 0%"></div>
+    </div>
+    <div id="questions"></div>
+    <div id="result"></div>
+
+<script>
+const questions = [
+    {
+        question: "您平时容易手脚心发热吗？",
+        options: [
+            {text: "经常", type: "yin", score: 2},
+            {text: "偶尔", type: "yin", score: 1},
+            {text: "很少", type: "yang", score: 1}
+        ]
+    },
+    {
+        question: "您感觉怕热还是怕冷？",
+        options: [
+            {text: "怕热", type: "yin", score: 2},
+            {text: "怕冷", type: "yang", score: 2},
+            {text: "都不明显", score: 0}
+        ]
+    },
+    {
+        question: "夜间睡眠时容易出汗吗？",
+        options: [
+            {text: "经常盗汗", type: "yin", score: 2},
+            {text: "偶尔有", type: "yin", score: 1},
+            {text: "很少出汗", type: "yang", score: 1}
+        ]
+    },
+    {
+        question: "您的大便情况如何？",
+        options: [
+            {text: "干燥便秘", type: "yin", score: 2},
+            {text: "稀溏", type: "yang", score: 2},
+            {text: "正常", score: 0}
+        ]
+    }
+];
+
+let currentQuestion = 0;
+let yinScore = 0;
+let yangScore = 0;
+
+function showQuestion() {
+    const container = document.getElementById("questions");
+    const q = questions[currentQuestion];
+    
+    let html = `<div class="question-box">
+        <h3>问题 ${currentQuestion+1}：${q.question}</h3>`;
+    
+    q.options.forEach((opt, index) => {
+        html += `<div class="option" onclick="selectOption(${index})">${opt.text}</div>`;
+    });
+    
+    html += "</div>";
+    container.innerHTML = html;
+    
+    // 更新进度条
+    const progress = (currentQuestion / questions.length) * 100;
+    document.querySelector(".progress").style.width = progress + "%";
+}
+
+function selectOption(optionIndex) {
+    const opt = questions[currentQuestion].options[optionIndex];
+    if(opt.type === "yin") yinScore += opt.score;
+    if(opt.type === "yang") yangScore += opt.score;
+    
+    currentQuestion++;
+    if(currentQuestion < questions.length) {
+        showQuestion();
+    } else {
+        showResult();
+    }
+}
+
+function showResult() {
+    document.getElementById("questions").style.display = "none";
+    document.querySelector(".progress").style.width = "100%";
+    
+    const resultDiv = document.getElementById("result");
+    resultDiv.style.display = "block";
+    
+    let resultText = "<h3>测试结果：</h3>";
+    
+    if(yinScore > yangScore) {
+        resultText += `
+            <p>体质倾向：<strong>阴虚体质</strong></p>
+            <div class="advice">
+                主要特征：五心烦热、午后潮热、盗汗、口干咽燥<br>
+                调养建议：滋阴润燥，适量食用银耳、百合、梨等食物<br>
+                避免：熬夜、辛辣燥热食物
+            </div>`;
+    } else if(yangScore > yinScore) {
+        resultText += `
+            <p>体质倾向：<strong>阳虚体质</strong></p>
+            <div class="advice">
+                主要特征：畏寒怕冷、四肢不温、小便清长<br>
+                调养建议：温补阳气，适量食用羊肉、生姜、桂圆等食物<br>
+                避免：生冷寒凉食物
+            </div>`;
+    } else {
+        resultText += "<p>测试结果不明显，建议结合其他症状综合判断</p>";
+    }
+    
+    resultDiv.innerHTML = resultText;
+}
+
+// 初始化显示第一个问题
+showQuestion();
+</script>
+
+<div style="color:#666; margin-top:30px; font-size:0.9em">
+    * 本测试仅供参考，具体体质判断请咨询专业中医师
+</div>
+
+</body>
+</html>
